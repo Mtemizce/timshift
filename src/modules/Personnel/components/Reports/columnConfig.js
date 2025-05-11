@@ -1,0 +1,43 @@
+// src/modules/Personnel/components/Reports/columnConfig.js
+
+export const columnOptions = [
+  { key: "name", label: "Ad Soyad", type: "text" },
+  { key: "tc_no", label: "TC Kimlik No", type: "text" },
+  { key: "phone", label: "Telefon", type: "text" },
+  { key: "email", label: "E-Posta", type: "text" },
+  { key: "birth_date", label: "Doğum Tarihi", type: "text" },
+  { key: "children_count", label: "Çocuk Sayısı", type: "text" },
+  { key: "marital_status", label: "Medeni Durum", type: "select", options: ["Evli", "Bekar", "Boşanmış"] },
+  { key: "start_date", label: "İşe Giriş Tarihi", type: "text" },
+  { key: "address", label: "Adres", type: "text" },
+  { key: "criminal_record", label: "Sicil Kaydı", type: "select", options: ["Var", "Yok"] },
+  { key: "certificates", label: "Sertifikalar", type: "text" },
+  { key: "department", label: "Birim", type: "text" },
+  { key: "role", label: "Görev", type: "select", options: ["Araç Arkası", "Şoför", "Mıntıka", "WC Tuvaletler"] },
+  { key: "driving_license", label: "Ehliyet Sınıfı", type: "text" },
+  { key: "education_level", label: "Eğitim Düzeyi", type: "select", options: ["Okumamış", "İlkokul", "Ortaokul", "Lise", "Ön Lisans", "Lisans"] },
+  { key: "iban", label: "IBAN", type: "text" },
+];
+
+export const defaultColumns = {
+  name: "Ad Soyad",
+  tc_no: "TC Kimlik No",
+  phone: "Telefon",
+  email: "E-Posta",
+  birth_date: "Doğum Tarihi",
+  children_count: "Çocuk Sayısı",
+  marital_status: "Medeni Durum",
+  start_date: "İşe Giriş Tarihi",
+  address: "Adres",
+  criminal_record: "Sicil Kaydı",
+  certificates: "Sertifikalar",
+  department: "Birim",
+  role: "Görev",
+  driving_license: "Ehliyet Sınıfı",
+  education_level: "Eğitim Düzeyi",
+  iban: "IBAN",
+  size_pants: "Pantolon",
+  size_tshirt: "Tişört",
+  size_coat: "Mont",
+  size_shoes: "Ayakkabı No",
+};

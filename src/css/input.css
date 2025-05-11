@@ -1,0 +1,48 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+@keyframes moon-rock {
+    0% { transform: rotate(0deg); }
+    30% { transform: rotate(15deg); }
+    60% { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg); }
+  }
+  
+  .animate-moon-rock {
+    animation: moon-rock 0.8s ease-in-out;
+  }
+  @keyframes sun-flip {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+    100% { transform: rotate(0deg); }
+  }
+  
+  .animate-sun-flip {
+    animation: sun-flip 0.8s ease-in-out;
+  }
+  
+
+  /* input.css */
+.input {
+  @apply w-full p-2 border rounded dark:bg-gray-800 dark:text-white dark:border-gray-700;
+}
+.input:focus {
+  @apply border-blue-500 dark:border-blue-400;
+}
+.dashboardBtn {
+  @apply  px-4 py-2 rounded flex items-center gap-2 cursor-pointer transition duration-300 ease-in-out;
+}
+.tableBtn {
+  @apply font-bold p-2 rounded cursor-pointer transition duration-300 ease-in-out;
+}
+.tableBtnExcel {
+  @apply bg-green-500 text-white hover:bg-green-600;
+}
+.tableBtnPdf {
+  @apply bg-red-500 text-white hover:bg-red-600;
+}
+.tableBtnPrint {
+  @apply bg-blue-500 text-white hover:bg-blue-600;
+}
+.tableBtnFullscreen {
+  @apply bg-gray-500 text-white hover:bg-gray-600;
+}

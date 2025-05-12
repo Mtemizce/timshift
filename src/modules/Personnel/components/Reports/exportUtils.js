@@ -1,94 +1,153 @@
-// src/modules/Personnel/components/Reports/exportUtils.js
-
-import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
-function sanitize(text) {
-  return text?.replace(/[\u00A0-\u9999<>\&]/gim, i => '&#' + i.charCodeAt(0) + ';') || "";
-}
+// Kullanıcı bilgisi alımı
+const getCurrentUserName = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem("admins"));
+    return user?.name || "Bilinmeyen Kullanıcı";
+  } catch {
+    return "Bilinmeyen Kullanıcı";
+  }
+};
 
-export function handleExport({ type, rows, columns, headerOptions }) {
-  const visibleColumns = Array.isArray(columns) ? columns : [];
-  const headers = visibleColumns.map((c) => c.label);
-  const data = rows.map((row) => visibleColumns.map((c) => row[c.key]));
+const formatDate = (dateStr) => {
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("tr-TR");
+  } catch {
+    return dateStr;
+  }
+};
 
-  if (type === "xlsx") {
-    const sheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, sheet, "Personeller");
+export const exportToPDF = (data, selectedColumns, columnLabels, headerOptions = {}) => {
+  const doc = new jsPDF();
 
-    if (headerOptions.enabled && headerOptions.text) {
-      const lines = headerOptions.text.split("\n");
-      lines.reverse().forEach((line) => {
-        XLSX.utils.sheet_add_aoa(sheet, [[line]], { origin: -1 });
-      });
-    }
+  const user = getCurrentUserName();
+  const now = new Date().toLocaleString("tr-TR");
 
-    XLSX.writeFile(wb, "personeller.xlsx");
+  if (headerOptions.text) {
+    doc.setFontSize(headerOptions.fontSize || 16);
+    doc.text(headerOptions.text, 14, 20, { align: headerOptions.align || "left" });
   }
 
-  if (type === "pdf") {
-    const doc = new jsPDF();
-    if (headerOptions.enabled && headerOptions.text) {
-      const lines = headerOptions.text.split("\n");
-      doc.setFontSize(headerOptions.fontSize || 14);
-      doc.setTextColor(headerOptions.textColor || "#000000");
-      doc.setFillColor(headerOptions.bgColor || "#ffffff");
+  const columns = selectedColumns.map((col) => ({
+    header: columnLabels[col] || col,
+    dataKey: col,
+  }));
 
-      lines.forEach((line, i) => {
-        doc.text(line, 105, 10 + i * 10, { align: headerOptions.textAlign || "left" });
-      });
-    }
+  autoTable(doc, {
+    startY: headerOptions.text ? 30 : 10,
+    head: [columns.map((c) => c.header)],
+    body: data.map((row) =>
+      columns.map((c) => {
+        const val = row[c.dataKey];
+        return typeof val === "string" && val.includes("T") ? formatDate(val) : val ?? "";
+      })
+    ),
+    styles: { font: "helvetica" },
+  });
 
-    autoTable(doc, {
-      head: [headers],
-      body: data,
-      startY: headerOptions.enabled ? 20 : 10,
-    });
+  doc.setFontSize(10);
+  doc.text(`Düzenleyen: ${user}`, 14, doc.lastAutoTable.finalY + 10);
+  doc.text(`Tarih: ${now}`, 14, doc.lastAutoTable.finalY + 15);
+  doc.text(`Toplam Kayıt: ${data.length}`, 14, doc.lastAutoTable.finalY + 20);
 
-    doc.save("personeller.pdf");
-  }
+  doc.save("rapor.pdf");
+};
 
-  if (type === "print") {
-    const win = window.open("", "_blank");
-    const styles = `
+export const exportToExcel = (data, selectedColumns, columnLabels, headerOptions = {}) => {
+  const user = getCurrentUserName();
+  const now = new Date().toLocaleString("tr-TR");
+
+  const headerRow = selectedColumns.map((col) => columnLabels[col] || col);
+  const bodyRows = data.map((row) =>
+    selectedColumns.map((col) => {
+      const val = row[col];
+      return typeof val === "string" && val.includes("T") ? formatDate(val) : val ?? "";
+    })
+  );
+
+  const sheetData = [
+    [headerOptions.text || "Personel Raporu"],
+    [""],
+    headerRow,
+    ...bodyRows,
+    [""],
+    [`Düzenleyen: ${user}`],
+    [`Tarih: ${now}`],
+    [`Toplam Kayıt: ${data.length}`],
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(sheetData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Rapor");
+  XLSX.writeFile(wb, "rapor.xlsx");
+};
+
+export const exportToPrint = (data, selectedColumns, columnLabels, headerOptions = {}) => {
+  const user = getCurrentUserName();
+  const now = new Date().toLocaleString("tr-TR");
+
+  const tableHTML = `
+    <table>
+      <thead><tr>
+        ${selectedColumns.map((col) => `<th>${columnLabels[col] || col}</th>`).join("")}
+      </tr></thead>
+      <tbody>
+        ${data
+          .map(
+            (row) =>
+              `<tr>${selectedColumns
+                .map((col) => {
+                  const val = row[col];
+                  const formatted = typeof val === "string" && val.includes("T") ? formatDate(val) : val;
+                  return `<td>${formatted ?? ""}</td>`;
+                })
+                .join("")}</tr>`
+          )
+          .join("")}
+      </tbody>
+    </table>`;
+
+  const printWindow = window.open("", "_blank");
+  printWindow.document.write(`
+    <html>
+    <head>
+      <title>Yazdır</title>
       <style>
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #000; padding: 4px; }
-        .header { background: ${headerOptions.bgColor}; color: ${headerOptions.textColor}; font-size: ${headerOptions.fontSize}px; text-align: ${headerOptions.textAlign}; padding: 10px; }
+        body { font-family: Arial; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        h2 { text-align: ${headerOptions.align || "left"}; font-size: ${
+    headerOptions.fontSize || 16
+  }px; margin-bottom: 20px; }
       </style>
-    `;
-    const header = headerOptions.enabled && headerOptions.text
-      ? `<div class="header">${headerOptions.text.replace(/\n/g, "<br/>")}</div>`
-      : "";
+    </head>
+    <body>
+      ${headerOptions.text ? `<h2>${headerOptions.text}</h2>` : ""}
+      ${tableHTML}
+      <div style="margin-top: 20px;">
+        <p>Düzenleyen: ${user}</p>
+        <p>Tarih: ${now}</p>
+        <p>Toplam Kayıt: ${data.length}</p>
+      </div>
+    </body>
+    </html>`);
+  printWindow.document.close();
+  printWindow.print();
+};
 
-    const html = `
-      <html>
-        <head><title>Yazdır</title>${styles}</head>
-        <body>
-          ${header}
-          <table>
-            <thead>
-              <tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr>
-            </thead>
-            <tbody>
-              ${data.map((row) => `<tr>${row.map((v) => `<td>${v || "-"}</td>`).join("")}</tr>`).join("")}
-            </tbody>
-          </table>
-          <script>
-            window.onload = function() {
-              setTimeout(() => {
-                window.print();
-                window.close();
-              }, 500);
-            }
-          </script>
-        </body>
-      </html>
-    `;
-
-    win.document.write(html);
-    win.document.close();
+export const handleExport = (format, data, selectedColumns, columnLabels, headerOptions) => {
+  switch (format) {
+    case "pdf":
+      return exportToPDF(data, selectedColumns, columnLabels, headerOptions);
+    case "excel":
+      return exportToExcel(data, selectedColumns, columnLabels, headerOptions);
+    case "print":
+      return exportToPrint(data, selectedColumns, columnLabels, headerOptions);
+    default:
+      console.error("Geçersiz format:", format);
   }
-}
+};

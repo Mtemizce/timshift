@@ -1,86 +1,119 @@
-// src/modules/Personnel/components/Reports/Conditions.jsx
+import { React } from "react";
+import { PlusCircle, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 
-import { useState } from "react";
-import { columnOptions } from "./columnConfig";
+export default function Conditions({ conditions, setConditions }) {
+ 
 
-export default function Conditions({ onSearch }) {
-  const [conditions, setConditions] = useState([]);
+  const columnOptions = [
+    { key: "name", label: "Ad Soyad", type: "text" },
+    { key: "tc_no", label: "TC Kimlik No", type: "text" },
+    { key: "phone", label: "Telefon", type: "text" },
+    { key: "email", label: "E-Posta", type: "text" },
+    { key: "birth_date", label: "Doğum Tarihi", type: "text" },
+    { key: "children_count", label: "Çocuk Sayısı", type: "text" },
+    {
+      key: "marital_status",
+      label: "Medeni Durum",
+      type: "select",
+      options: ["Evli", "Bekar", "Boşanmış"],
+    },
+    { key: "start_date", label: "İşe Giriş Tarihi", type: "text" },
+    { key: "address", label: "Adres", type: "text" },
+    {
+      key: "criminal_record",
+      label: "Sicil Kaydı",
+      type: "select",
+      options: ["Var", "Yok"],
+    },
+    { key: "department", label: "Departman", type: "text" },
+    { key: "role", label: "Görev", type: "text" },
+  ];
+ 
 
   const handleAdd = () => {
     setConditions([...conditions, { field: "", value: "" }]);
   };
 
-  const handleChange = (i, key, val) => {
-    const next = [...conditions];
-    next[i][key] = val;
-    setConditions(next);
+  const handleRemove = (index) => {
+    const updated = [...conditions];
+    updated.splice(index, 1);
+    setConditions(updated);
   };
 
-  const handleRemove = (i) => {
-    setConditions(conditions.filter((_, idx) => idx !== i));
-  };
-
-  const handleSearch = async () => {
-    const res = await fetch("http://localhost:3001/api/personnel", {
-      headers: { Authorization: localStorage.getItem("admin") },
-    });
-    let list = await res.json();
-
-    conditions.forEach((c) => {
-      const col = columnOptions.find((o) => o.key === c.field);
-      if (col?.type === "select") {
-        list = list.filter((p) => p[c.field] === c.value);
-      } else {
-        list = list.filter((p) => p[c.field]?.toString().toLowerCase().includes(c.value.toLowerCase()));
-      }
-    });
-
-    onSearch(list);
+  const handleChange = (index, key, value) => {
+    const updated = [...conditions];
+    updated[index][key] = value;
+    setConditions(updated);
   };
 
   return (
-    <div className="space-y-2">
-      <h3 className="font-semibold">Koşullar</h3>
-      {conditions.map((c, i) => (
-        <div key={i} className="flex gap-2 items-center">
-          <select
-            className="input"
-            value={c.field}
-            onChange={(e) => handleChange(i, "field", e.target.value)}
-          >
-            <option value="">Kolon Seç</option>
-            {columnOptions.map((o) => (
-              <option key={o.key} value={o.key}>{o.label}</option>
-            ))}
-          </select>
-
-          {columnOptions.find((o) => o.key === c.field)?.type === "select" ? (
-            <select
-              className="input"
-              value={c.value}
-              onChange={(e) => handleChange(i, "value", e.target.value)}
-            >
-              <option value="">Seçiniz</option>
-              {columnOptions.find((o) => o.key === c.field)?.options?.map((o) => (
-                <option key={o} value={o}>{o}</option>
-              ))}
-            </select>
-          ) : (
-            <input
-              className="input"
-              value={c.value}
-              onChange={(e) => handleChange(i, "value", e.target.value)}
-              placeholder="Değer girin"
-            />
-          )}
-
-          <button onClick={() => handleRemove(i)} className="btn">❌</button>
-        </div>
-      ))}
-      <div className="flex gap-2 mt-2">
-        <button onClick={handleAdd} className="btn">➕ Koşul Ekle</button>
-        <button onClick={handleSearch} className="btn bg-blue-600 text-white">🔍 Raporu Getir</button>
+    <div className="w-full md:w-1/2">
+      <div
+        className="flex items-center justify-between cursor-pointer mb-2"
+      
+      >
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-white">Filtre Koşulları</h3>
+        
       </div>
+
+      {open && (
+        <div className="flex flex-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-md shadow-md">
+          {conditions.map((cond, index) => {
+            const selectedCol = columnOptions.find((c) => c.label === cond.field);
+            return (
+              <div key={index} className="flex gap-2 items-center justify-around">
+                <select
+                  className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                  value={cond.field}
+                  onChange={(e) => handleChange(index, "field", e.target.value)}
+                >
+                  <option value="">Alan Seç</option>
+                  {columnOptions.map((col) => (
+                    <option key={col.key} value={col.label}>
+                      {col.label}
+                    </option>
+                  ))}
+                </select>
+
+                {selectedCol?.type === "select" ? (
+                  <select
+                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                    value={cond.value}
+                    onChange={(e) => handleChange(index, "value", e.target.value)}
+                  >
+                    <option value="">Değer Seç</option>
+                    {selectedCol.options.map((opt, i) => (
+                      <option key={i} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                    value={cond.value}
+                    onChange={(e) => handleChange(index, "value", e.target.value)}
+                    placeholder="Değer girin"
+                  />
+                )}
+
+                <button onClick={() => handleRemove(index)}>
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            );
+          })}
+
+          <button
+            onClick={handleAdd}
+            className="flex font-bold text-sm items-center gap-1 text-blue-600 mt-1 cursor-pointer group transition-colors duration-300 "
+          >
+            <PlusCircle size={16} className="group-hover:text-red-500" />
+            Koşul Ekle
+          </button>
+        </div>
+      )}
     </div>
   );
 }

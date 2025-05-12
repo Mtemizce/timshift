@@ -1,114 +1,108 @@
-// src/modules/Personnel/components/Reports/ColumnSelector.jsx
+// ✅ Tam revize edilmiş ColumnSelector.jsx (toggle switchli, UI düzenli)
+import { Sun, Moon } from "lucide-react";
 
-import { useEffect, useState } from "react";
-import { columnOptions } from "./columnConfig";
-
-export default function ColumnSelector({ selectedColumns, setSelectedColumns, headerOptions, setHeaderOptions }) {
-  const [showHeaderOptions, setShowHeaderOptions] = useState(headerOptions.enabled);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("personnel-report-columns");
-    if (saved) {
-      setSelectedColumns(JSON.parse(saved));
-    } else {
-      const defaults = {};
-      columnOptions.forEach((c) => (defaults[c.key] = true));
-      setSelectedColumns(defaults);
-    }
-  }, [setSelectedColumns]);
-
-  const toggle = (key) => {
-    const next = { ...selectedColumns, [key]: !selectedColumns[key] };
-    setSelectedColumns(next);
-    localStorage.setItem("personnel-report-columns", JSON.stringify(next));
+export default function ColumnSelector({
+  selectedColumns,
+  setSelectedColumns,
+  columnLabels,
+  headerOptions,
+  setHeaderOptions,
+}) {
+  const toggleColumn = (key) => {
+    const updated = selectedColumns.includes(key)
+      ? selectedColumns.filter((k) => k !== key)
+      : [...selectedColumns, key];
+    setSelectedColumns(updated);
+    localStorage.setItem("personnel-report-columns", JSON.stringify(updated));
   };
 
-  const handleHeaderChange = (e) => {
-    const { name, value } = e.target;
-    setHeaderOptions((prev) => ({ ...prev, [name]: value }));
+  const updateHeader = (field, value) => {
+    const updated = { ...headerOptions, [field]: value };
+    setHeaderOptions(updated);
+    localStorage.setItem("personnel-report-header", JSON.stringify(updated));
+  };
+
+  const toggleHeaderVisibility = () => {
+    updateHeader("showHeader", !headerOptions.showHeader);
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold">📌 Kolon Seçimi</h3>
-      <div className="flex flex-wrap gap-2">
-        {columnOptions.map((col) => (
-          <label key={col.key} className="flex items-center gap-1 text-sm">
-            <input
-              type="checkbox"
-              checked={selectedColumns[col.key] || false}
-              onChange={() => toggle(col.key)}
-            />
-            {col.label}
-          </label>
-        ))}
+    <div className="w-full md:w-1/2 my-2  ">
+      <div className="p-4 bg-white rounded-md shadow-md dark:bg-gray-800">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-white mb-2">
+          Sütun Seçimi
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {Object.entries(columnLabels).map(([key, label]) => (
+            <label key={key} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={selectedColumns.includes(key)}
+                onChange={() => toggleColumn(key)}
+                className="accent-blue-600"
+              />
+              {label}
+            </label>
+          ))}
+        </div>
       </div>
 
-      <label className="flex items-center gap-2 mt-4">
-        <input
-          type="checkbox"
-          checked={showHeaderOptions}
-          onChange={(e) => {
-            const checked = e.target.checked;
-            setShowHeaderOptions(checked);
-            setHeaderOptions((prev) => ({ ...prev, enabled: checked }));
-          }}
-        />
-        Özel Üst Başlık Ekle
-      </label>
-
-      {showHeaderOptions && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded shadow">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Metin</label>
-            <textarea
-              name="text"
-              rows={3}
-              className="input"
-              value={headerOptions.text}
-              onChange={handleHeaderChange}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Yazı Rengi</label>
-            <input
-              type="color"
-              name="textColor"
-              value={headerOptions.textColor}
-              onChange={handleHeaderChange}
-              className="h-10 w-full"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Arkaplan Rengi</label>
-            <input
-              type="color"
-              name="bgColor"
-              value={headerOptions.bgColor}
-              onChange={handleHeaderChange}
-              className="h-10 w-full"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Yazı Konumu</label>
-            <select name="textAlign" value={headerOptions.textAlign} onChange={handleHeaderChange} className="input">
-              <option value="left">Sola Yasla</option>
-              <option value="center">Ortala</option>
-              <option value="right">Sağa Yasla</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Yazı Boyutu</label>
-            <input
-              type="number"
-              name="fontSize"
-              value={headerOptions.fontSize}
-              onChange={handleHeaderChange}
-              className="input"
-            />
-          </div>
+      <div className="my-2 p-4 bg-white rounded-md shadow-md dark:bg-gray-800">
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-sm font-medium">Özel Üst Başlık Kullan</label>
+          <button
+            onClick={toggleHeaderVisibility}
+            className={`w-10 h-5 rounded-full cursor-pointer border flex items-center px-1 transition-colors duration-300 ${
+              headerOptions.showHeader ? "bg-green-500 border-green-600" : "bg-gray-300 border-gray-400"
+            }`}
+          >
+            <div
+              className={`w-4 h-4 rounded-full bg-white shadow transform transition-transform duration-300 ${
+                headerOptions.showHeader ? "translate-x-5" : "translate-x-0"
+              }`}
+            ></div>
+          </button>
         </div>
-      )}
+
+        {headerOptions.showHeader && (
+          <div className="space-y-2">
+            <div>
+              <label className="text-sm font-medium block mb-1">Üst Başlık</label>
+              <textarea
+                className="w-full border rounded px-2 py-1 text-sm"
+                rows={2}
+                value={headerOptions.text}
+                onChange={(e) => updateHeader("text", e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div>
+                <label className="text-sm font-medium block mb-1">Yazı Boyutu</label>
+                <input
+                  type="number"
+                  min={10}
+                  className="border rounded px-2 py-1 w-20 text-sm"
+                  value={headerOptions.fontSize}
+                  onChange={(e) => updateHeader("fontSize", parseInt(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium block mb-1">Hizalama</label>
+                <select
+                  className="border rounded px-2 py-1 text-sm"
+                  value={headerOptions.align}
+                  onChange={(e) => updateHeader("align", e.target.value)}
+                >
+                  <option value="left">Sola</option>
+                  <option value="center">Ortala</option>
+                  <option value="right">Sağa</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

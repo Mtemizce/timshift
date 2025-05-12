@@ -5,7 +5,9 @@ import * as XLSX from "xlsx";
 // Kullanıcı bilgisi alımı
 const getCurrentUserName = () => {
   try {
-    const user = JSON.parse(localStorage.getItem("admins"));
+    const userStr = localStorage.getItem("admins");
+    if (!userStr) return "Bilinmeyen Kullanıcı";
+    const user = JSON.parse(userStr);
     return user?.name || "Bilinmeyen Kullanıcı";
   } catch {
     return "Bilinmeyen Kullanıcı";
@@ -27,7 +29,7 @@ export const exportToPDF = (data, selectedColumns, columnLabels, headerOptions =
   const user = getCurrentUserName();
   const now = new Date().toLocaleString("tr-TR");
 
-  if (headerOptions.text) {
+  if (headerOptions?.showHeader && headerOptions.text) {
     doc.setFontSize(headerOptions.fontSize || 16);
     doc.text(headerOptions.text, 14, 20, { align: headerOptions.align || "left" });
   }
@@ -38,7 +40,7 @@ export const exportToPDF = (data, selectedColumns, columnLabels, headerOptions =
   }));
 
   autoTable(doc, {
-    startY: headerOptions.text ? 30 : 10,
+    startY: headerOptions?.showHeader && headerOptions.text ? 30 : 10,
     head: [columns.map((c) => c.header)],
     body: data.map((row) =>
       columns.map((c) => {
@@ -69,16 +71,18 @@ export const exportToExcel = (data, selectedColumns, columnLabels, headerOptions
     })
   );
 
-  const sheetData = [
-    [headerOptions.text || "Personel Raporu"],
-    [""],
-    headerRow,
-    ...bodyRows,
-    [""],
-    [`Düzenleyen: ${user}`],
-    [`Tarih: ${now}`],
-    [`Toplam Kayıt: ${data.length}`],
-  ];
+  const sheetData = [];
+
+  if (headerOptions?.showHeader && headerOptions.text) {
+    sheetData.push([headerOptions.text], [""]);
+  }
+
+  sheetData.push(headerRow);
+  sheetData.push(...bodyRows);
+  sheetData.push([""]);
+  sheetData.push([`Düzenleyen: ${user}`]);
+  sheetData.push([`Tarih: ${now}`]);
+  sheetData.push([`Toplam Kayıt: ${data.length}`]);
 
   const ws = XLSX.utils.aoa_to_sheet(sheetData);
   const wb = XLSX.utils.book_new();
@@ -120,13 +124,15 @@ export const exportToPrint = (data, selectedColumns, columnLabels, headerOptions
         body { font-family: Arial; padding: 20px; }
         table { border-collapse: collapse; width: 100%; margin-top: 20px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        h2 { text-align: ${headerOptions.align || "left"}; font-size: ${
-    headerOptions.fontSize || 16
-  }px; margin-bottom: 20px; }
+        h2 { text-align: ${headerOptions.align || "left"}; font-size: ${headerOptions.fontSize || 16}px; margin-bottom: 20px; }
       </style>
     </head>
     <body>
-      ${headerOptions.text ? `<h2>${headerOptions.text}</h2>` : ""}
+      ${
+        headerOptions?.showHeader && headerOptions.text
+          ? `<h2>${headerOptions.text}</h2>`
+          : ""
+      }
       ${tableHTML}
       <div style="margin-top: 20px;">
         <p>Düzenleyen: ${user}</p>

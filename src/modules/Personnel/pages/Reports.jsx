@@ -37,69 +37,58 @@ export default function Reports() {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetchWithAuth("http://localhost:3001/api/personnel");
-        const result = await res.json();
-        setData(result);
-        setFilteredData(result); // ilk açılışta tüm personeller
-      } catch (err) {
-        console.error("Veri çekme hatası:", err);
-        Swal.fire("Hata", "Personel verileri alınamadı", "error");
-      }
-    };
-
-    fetchData();
-
     const storedCols = JSON.parse(localStorage.getItem("personnel-report-columns"));
     const storedHeader = JSON.parse(localStorage.getItem("personnel-report-header"));
     if (storedCols && Array.isArray(storedCols)) setSelectedColumns(storedCols);
     if (storedHeader) setHeaderOptions((prev) => ({ ...prev, ...storedHeader }));
   }, []);
 
-  const handleReport = () => {
-    if (!Array.isArray(data) || data.length === 0) {
-      Swal.fire({ icon: "warning", title: "Veri kaynağı boş!" });
-      setFilteredData([]);
-      return;
+  const handleReport = async () => {
+    try {
+      const res = await fetchWithAuth("http://localhost:3001/api/personnel");
+      const result = await res.json();
+      setData(result);
+
+      if (!conditions.length) {
+        setFilteredData(result);
+        return;
+      }
+
+      const filtered = result.filter((row) =>
+        conditions.every((cond) => {
+          const key = labelToKeyMap[cond.field];
+          const val = row[key];
+          const search = cond.value?.toLowerCase();
+          if (!key || val === undefined || val === null) return false;
+
+          if (typeof val === "string" && val.includes("T")) {
+            const formatted = new Date(val).toLocaleDateString("tr-TR");
+            return formatted.includes(search);
+          }
+
+          if (typeof val === "string") return val.toLowerCase().includes(search);
+          if (typeof val === "number") return val.toString().includes(search);
+
+          return false;
+        })
+      );
+
+      if (filtered.length === 0) {
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "info",
+          title: "Eşleşen kayıt bulunamadı!",
+          showConfirmButton: false,
+          timer: 2500,
+        });
+      }
+
+      setFilteredData(filtered);
+    } catch (err) {
+      console.error("Veri çekme hatası:", err);
+      Swal.fire("Hata", "Personel verileri alınamadı", "error");
     }
-
-    if (!conditions.length) {
-      setFilteredData(data);
-      return;
-    }
-
-    const result = data.filter((row) =>
-      conditions.every((cond) => {
-        const key = labelToKeyMap[cond.field];
-        const val = row[key];
-        const search = cond.value?.toLowerCase();
-        if (!key || val === undefined || val === null) return false;
-
-        if (typeof val === "string" && val.includes("T")) {
-          const formatted = new Date(val).toLocaleDateString("tr-TR");
-          return formatted.includes(search);
-        }
-
-        if (typeof val === "string") return val.toLowerCase().includes(search);
-        if (typeof val === "number") return val.toString().includes(search);
-
-        return false;
-      })
-    );
-
-    if (result.length === 0) {
-      Swal.fire({
-        toast: true,
-        position: "top-end",
-        icon: "info",
-        title: "Eşleşen kayıt bulunamadı!",
-        showConfirmButton: false,
-        timer: 2500,
-      });
-    }
-
-    setFilteredData(result);
   };
 
   return (

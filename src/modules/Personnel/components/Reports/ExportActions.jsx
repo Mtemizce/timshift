@@ -1,13 +1,17 @@
 import { handleExport } from "./exportUtils";
 import { FileText, FileDown, Printer } from "lucide-react";
 
+
 export default function ExportActions({
   data,
   selectedColumns,
   columnLabels,
   headerOptions,
+  
 }) {
+  
   return (
+    
     <div className="flex gap-2">
       <button
         title="PDF"

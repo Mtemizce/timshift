@@ -1,6 +1,7 @@
 import { handleExport } from "./exportUtils";
 import { FileText, FileDown, Printer } from "lucide-react";
-
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PersonnelReportPDF from "./pdf/PersonnelReportPDF";
 
 export default function ExportActions({
   data,
@@ -13,15 +14,29 @@ export default function ExportActions({
   return (
     
     <div className="flex gap-2">
-      <button
-        title="PDF"
-        className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded cursor-pointer"
-        onClick={() =>
-          handleExport("pdf", data, selectedColumns, columnLabels, headerOptions)
+      {data?.length > 0 && selectedColumns?.length > 0 && (
+      <PDFDownloadLink
+        document={
+          <PersonnelReportPDF
+            data={data}
+            selectedColumns={selectedColumns}
+            columnLabels={columnLabels}
+            headerOptions={headerOptions}
+          />
         }
+        fileName="personel_raporu.pdf"
       >
-        <FileText size={18} />
-      </button>
+        {({ loading }) => (
+          <button
+            title="PDF"
+            className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded cursor-pointer"
+          >
+            <FileText size={18} />
+          </button>
+        )}
+      </PDFDownloadLink>
+      )}
+
       <button
         title="Excel"
         className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded cursor-pointer"

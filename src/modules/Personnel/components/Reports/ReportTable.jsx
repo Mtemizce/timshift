@@ -46,7 +46,7 @@ export default function ReportTable({
               <tr key={idx}>
                 {selectedColumns.map((colKey) => (
                   <td key={colKey} className="px-6 py-4 whitespace-nowrap">
-                    {row[colKey]?.toString().includes("T")
+                    {typeof row[colKey] === "string" && /^\d{4}-\d{2}-\d{2}T/.test(row[colKey])
                       ? new Date(row[colKey]).toLocaleDateString("tr-TR")
                       : row[colKey] ?? "-"}
                   </td>

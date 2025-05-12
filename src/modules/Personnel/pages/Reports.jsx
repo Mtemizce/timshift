@@ -1,30 +1,32 @@
-// ✅ Tam revize edilmiş Reports.jsx (tüm yapıyı toparlayan son sürüm)
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import Conditions from "../components/Reports/Conditions";
 import ColumnSelector from "../components/Reports/ColumnSelector";
 import ReportTable from "../components/Reports/ReportTable";
+import { fetchWithAuth } from "../../../lib/fetchWithAuth";
 
 const columnOptions = [
   { key: "name", label: "Ad Soyad" },
   { key: "tc_no", label: "TC Kimlik No" },
   { key: "phone", label: "Telefon" },
   { key: "email", label: "E-Posta" },
-  { key: "birth_date", label: "Doğum Tarihi" },
+  { key: "birth_date", label: "Doğum Tarihi", type: "date" },
   { key: "children_count", label: "Çocuk Sayısı" },
-  { key: "marital_status", label: "Medeni Durum" },
-  { key: "start_date", label: "İşe Giriş Tarihi" },
+  { key: "marital_status", label: "Medeni Durum", type: "select", options: ["Evli", "Bekar", "Boşanmış"] },
+  { key: "start_date", label: "İşe Giriş Tarihi", type: "date" },
   { key: "address", label: "Adres" },
-  { key: "criminal_record", label: "Sicil Kaydı" },
+  { key: "criminal_record", label: "Sicil Kaydı", type: "select", options: ["Var", "Yok"] },
   { key: "department", label: "Departman" },
-  { key: "role", label: "Görev" },
+  { key: "role", label: "Görev", type: "select", options: ["Araç Arkası", "Şoför", "Mıntıka", "WC Tuvaletler"] },
 ];
 
 const columnLabels = Object.fromEntries(columnOptions.map((col) => [col.key, col.label]));
 const labelToKeyMap = Object.fromEntries(columnOptions.map((col) => [col.label, col.key]));
 const columnKeys = columnOptions.map((col) => col.key);
 
-export default function Reports({ data = [] }) {
+export default function Reports() {
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [conditions, setConditions] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState(columnKeys);
   const [headerOptions, setHeaderOptions] = useState({
@@ -33,9 +35,22 @@ export default function Reports({ data = [] }) {
     fontSize: 16,
     showHeader: true,
   });
-  const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetchWithAuth("http://localhost:3001/api/personnel");
+        const result = await res.json();
+        setData(result);
+        setFilteredData(result); // ilk açılışta tüm personeller
+      } catch (err) {
+        console.error("Veri çekme hatası:", err);
+        Swal.fire("Hata", "Personel verileri alınamadı", "error");
+      }
+    };
+
+    fetchData();
+
     const storedCols = JSON.parse(localStorage.getItem("personnel-report-columns"));
     const storedHeader = JSON.parse(localStorage.getItem("personnel-report-header"));
     if (storedCols && Array.isArray(storedCols)) setSelectedColumns(storedCols);
@@ -43,14 +58,33 @@ export default function Reports({ data = [] }) {
   }, []);
 
   const handleReport = () => {
-    if (!Array.isArray(data)) return setFilteredData([]);
-    if (!conditions.length) return setFilteredData(data);
+    if (!Array.isArray(data) || data.length === 0) {
+      Swal.fire({ icon: "warning", title: "Veri kaynağı boş!" });
+      setFilteredData([]);
+      return;
+    }
+
+    if (!conditions.length) {
+      setFilteredData(data);
+      return;
+    }
 
     const result = data.filter((row) =>
       conditions.every((cond) => {
         const key = labelToKeyMap[cond.field];
-        if (!key || !row[key]) return false;
-        return row[key].toString().toLowerCase().includes(cond.value?.toLowerCase());
+        const val = row[key];
+        const search = cond.value?.toLowerCase();
+        if (!key || val === undefined || val === null) return false;
+
+        if (typeof val === "string" && val.includes("T")) {
+          const formatted = new Date(val).toLocaleDateString("tr-TR");
+          return formatted.includes(search);
+        }
+
+        if (typeof val === "string") return val.toLowerCase().includes(search);
+        if (typeof val === "number") return val.toString().includes(search);
+
+        return false;
       })
     );
 

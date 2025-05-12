@@ -1,4 +1,4 @@
-// ✅ Tam revize edilmiş ColumnSelector.jsx (toggle switchli, UI düzenli)
+// ✅ Tam revize edilmiş ColumnSelector.jsx - renk, yön ve önizleme destekli
 import { Sun, Moon } from "lucide-react";
 
 export default function ColumnSelector({
@@ -27,7 +27,7 @@ export default function ColumnSelector({
   };
 
   return (
-    <div className="w-full md:w-1/2 my-2  ">
+    <div className="w-full md:w-1/2 my-2">
       <div className="p-4 bg-white rounded-md shadow-md dark:bg-gray-800">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-white mb-2">
           Sütun Seçimi
@@ -70,13 +70,17 @@ export default function ColumnSelector({
               <label className="text-sm font-medium block mb-1">Üst Başlık</label>
               <textarea
                 className="w-full border rounded px-2 py-1 text-sm"
-                rows={2}
+                rows={3}
                 value={headerOptions.text}
                 onChange={(e) => updateHeader("text", e.target.value)}
+                style={{
+                  backgroundColor: headerOptions.bgColor || "#fff",
+                  color: headerOptions.textColor || "#000",
+                }}
               />
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <div>
                 <label className="text-sm font-medium block mb-1">Yazı Boyutu</label>
                 <input
@@ -87,6 +91,7 @@ export default function ColumnSelector({
                   onChange={(e) => updateHeader("fontSize", parseInt(e.target.value))}
                 />
               </div>
+
               <div>
                 <label className="text-sm font-medium block mb-1">Hizalama</label>
                 <select
@@ -97,6 +102,38 @@ export default function ColumnSelector({
                   <option value="left">Sola</option>
                   <option value="center">Ortala</option>
                   <option value="right">Sağa</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium block mb-1">Yazı Rengi</label>
+                <input
+                  type="color"
+                  className="w-10 h-8 p-0"
+                  value={headerOptions.textColor || "#000000"}
+                  onChange={(e) => updateHeader("textColor", e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium block mb-1">Arka Plan</label>
+                <input
+                  type="color"
+                  className="w-10 h-8 p-0"
+                  value={headerOptions.bgColor || "#ffffff"}
+                  onChange={(e) => updateHeader("bgColor", e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium block mb-1">Çıktı Yönü</label>
+                <select
+                  className="border rounded px-2 py-1 text-sm"
+                  value={headerOptions.orientation || "portrait"}
+                  onChange={(e) => updateHeader("orientation", e.target.value)}
+                >
+                  <option value="portrait">Dikey</option>
+                  <option value="landscape">Yatay</option>
                 </select>
               </div>
             </div>

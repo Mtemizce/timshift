@@ -1,8 +1,8 @@
+// ✅ exportUtils.js - Tüm çıktılarda üst başlık kontrolü, renk ve yön desteği
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
-// Kullanıcı bilgisi alımı
 const getCurrentUserName = () => {
   try {
     const userStr = localStorage.getItem("admins");
@@ -24,30 +24,27 @@ const formatDate = (dateStr) => {
 };
 
 export const exportToPDF = (data, selectedColumns, columnLabels, headerOptions = {}) => {
-  const doc = new jsPDF();
-
+  const doc = new jsPDF({ orientation: headerOptions.orientation || "portrait" });
   const user = getCurrentUserName();
   const now = new Date().toLocaleString("tr-TR");
 
   if (headerOptions?.showHeader && headerOptions.text) {
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(headerOptions.fontSize || 16);
+    doc.setTextColor(headerOptions.textColor || 0);
+    doc.setFillColor(headerOptions.bgColor || 255);
     doc.text(headerOptions.text, 14, 20, { align: headerOptions.align || "left" });
   }
 
-  const columns = selectedColumns.map((col) => ({
-    header: columnLabels[col] || col,
-    dataKey: col,
-  }));
+  const columns = selectedColumns.map((col) => ({ header: columnLabels[col] || col, dataKey: col }));
 
   autoTable(doc, {
     startY: headerOptions?.showHeader && headerOptions.text ? 30 : 10,
     head: [columns.map((c) => c.header)],
-    body: data.map((row) =>
-      columns.map((c) => {
-        const val = row[c.dataKey];
-        return typeof val === "string" && val.includes("T") ? formatDate(val) : val ?? "";
-      })
-    ),
+    body: data.map((row) => columns.map((c) => {
+      const val = row[c.dataKey];
+      return typeof val === "string" && val.includes("T") ? formatDate(val) : val ?? "";
+    })),
     styles: { font: "helvetica" },
   });
 
@@ -74,7 +71,9 @@ export const exportToExcel = (data, selectedColumns, columnLabels, headerOptions
   const sheetData = [];
 
   if (headerOptions?.showHeader && headerOptions.text) {
-    sheetData.push([headerOptions.text], [""]);
+    const lines = headerOptions.text.split("\n");
+    lines.forEach((line) => sheetData.push([line]));
+    sheetData.push([""]);
   }
 
   sheetData.push(headerRow);
@@ -102,14 +101,13 @@ export const exportToPrint = (data, selectedColumns, columnLabels, headerOptions
       <tbody>
         ${data
           .map(
-            (row) =>
-              `<tr>${selectedColumns
-                .map((col) => {
-                  const val = row[col];
-                  const formatted = typeof val === "string" && val.includes("T") ? formatDate(val) : val;
-                  return `<td>${formatted ?? ""}</td>`;
-                })
-                .join("")}</tr>`
+            (row) => `<tr>${selectedColumns
+              .map((col) => {
+                const val = row[col];
+                const formatted = typeof val === "string" && val.includes("T") ? formatDate(val) : val;
+                return `<td>${formatted ?? ""}</td>`;
+              })
+              .join("")}</tr>`
           )
           .join("")}
       </tbody>
@@ -124,13 +122,13 @@ export const exportToPrint = (data, selectedColumns, columnLabels, headerOptions
         body { font-family: Arial; padding: 20px; }
         table { border-collapse: collapse; width: 100%; margin-top: 20px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        h2 { text-align: ${headerOptions.align || "left"}; font-size: ${headerOptions.fontSize || 16}px; margin-bottom: 20px; }
+        h2 { text-align: ${headerOptions.align || "left"}; font-size: ${headerOptions.fontSize || 16}px; margin-bottom: 20px; color: ${headerOptions.textColor || "#000"}; background-color: ${headerOptions.bgColor || "#fff"}; padding: 10px; }
       </style>
     </head>
     <body>
       ${
         headerOptions?.showHeader && headerOptions.text
-          ? `<h2>${headerOptions.text}</h2>`
+          ? `<h2>${headerOptions.text.replace(/\n/g, "<br>")}</h2>`
           : ""
       }
       ${tableHTML}
@@ -139,6 +137,9 @@ export const exportToPrint = (data, selectedColumns, columnLabels, headerOptions
         <p>Tarih: ${now}</p>
         <p>Toplam Kayıt: ${data.length}</p>
       </div>
+      <script>
+        setTimeout(() => window.close(), 3000);
+      </script>
     </body>
     </html>`);
   printWindow.document.close();
@@ -147,13 +148,9 @@ export const exportToPrint = (data, selectedColumns, columnLabels, headerOptions
 
 export const handleExport = (format, data, selectedColumns, columnLabels, headerOptions) => {
   switch (format) {
-    case "pdf":
-      return exportToPDF(data, selectedColumns, columnLabels, headerOptions);
-    case "excel":
-      return exportToExcel(data, selectedColumns, columnLabels, headerOptions);
-    case "print":
-      return exportToPrint(data, selectedColumns, columnLabels, headerOptions);
-    default:
-      console.error("Geçersiz format:", format);
+    case "pdf": return exportToPDF(data, selectedColumns, columnLabels, headerOptions);
+    case "excel": return exportToExcel(data, selectedColumns, columnLabels, headerOptions);
+    case "print": return exportToPrint(data, selectedColumns, columnLabels, headerOptions);
+    default: console.error("Geçersiz format:", format);
   }
 };

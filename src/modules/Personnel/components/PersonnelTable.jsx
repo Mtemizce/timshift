@@ -8,6 +8,7 @@ import LeaveModal from "../modals/LeaveModal";
 import PersonnelTableHeader from "./PersonnelTable/PersonnelTableHeader";
 import PersonnelTableBody from "./PersonnelTable/PersonnelTableBody";
 import PersonnelTablePagination from "./PersonnelTable/PersonnelTablePagination";
+import { beApiUrl } from './../../../lib/config.js'
 
 export default function PersonnelTable() {
   const [data, setData] = useState([]);
@@ -25,7 +26,7 @@ export default function PersonnelTable() {
   const navigate = useNavigate();
 
   const fetchPersonnel = useCallback(async () => {
-    const res = await fetchWithAuth("http://localhost:3001/api/personnel");
+    const res = await fetchWithAuth(`${beApiUrl}/personnel`);
     const list = await res.json();
     const active = list.filter((p) => p.is_quitting === 0);
     setData(active);
@@ -72,7 +73,7 @@ export default function PersonnelTable() {
       inputValidator: (value) => (!value ? "Tarih seçilmelidir" : undefined),
     });
     if (!quit_date) return;
-    const res = await fetchWithAuth(`http://localhost:3001/api/personnel/${id}/quit`, {
+    const res = await fetchWithAuth(`${beApiUrl}/personnel/${id}/quit`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ end_date: quit_date }),

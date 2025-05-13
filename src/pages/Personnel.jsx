@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PersonnelForm from "../components/PersonnelForm";
 import { fetchWithAuth } from "../lib/fetchWithAuth";
+import { beApiUrl } from '../lib/config';
 
 export default function Personnel() {
   const [search, setSearch] = useState("");
@@ -18,7 +19,7 @@ export default function Personnel() {
   }, []);
 
   const fetchPersonnel = async () => {
-    const res = await fetchWithAuth("http://localhost:3001/api/personnel");
+    const res = await fetchWithAuth(`${beApiUrl}/personnel`);
     const data = await res.json();
     setPersonnel(data);
   };
@@ -31,8 +32,8 @@ export default function Personnel() {
     e.preventDefault();
     const method = form.id ? "PUT" : "POST";
     const url = form.id
-      ? `http://localhost:3001/api/personnel/${form.id}`
-      : "http://localhost:3001/api/personnel";
+      ? `${beApiUrl}/personnel/${form.id}`
+      : `${beApiUrl}/personnel`;
 
     const res = await fetchWithAuth(url, {
       method,
@@ -146,7 +147,7 @@ export default function Personnel() {
                     onClick={async () => {
                       if (confirm("İşten çıkarmak istediğine emin misin?")) {
                         const res = await fetchWithAuth(
-                          `http://localhost:3001/api/personnel/${p.id}/quit`,
+                          `${beApiUrl}/personnel/${p.id}/quit`,
                           { method: "PATCH" }
                         );
                         if (res.ok) fetchPersonnel();

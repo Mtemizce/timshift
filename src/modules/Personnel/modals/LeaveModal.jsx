@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { fetchWithAuth } from "../../../lib/fetchWithAuth";
 import Swal from "sweetalert2";
+import { beApiUrl } from './../../../lib/config.js';
 
 export default function LeaveModal({ isOpen, onClose, personnel, onSuccess }) {
   const [form, setForm] = useState({
@@ -18,7 +19,7 @@ export default function LeaveModal({ isOpen, onClose, personnel, onSuccess }) {
 
  const handleSubmit = async () => {
   try {
-    const res = await fetchWithAuth("http://localhost:3001/api/leave-records", {
+    const res = await fetchWithAuth(`${beApiUrl}/leave-records`, {
       method: "POST",
       body: JSON.stringify({
         personnelId: personnel.id,

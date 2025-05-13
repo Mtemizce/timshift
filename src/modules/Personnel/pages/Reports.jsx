@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import Conditions from "../components/Reports/Conditions";
 import ColumnSelector from "../components/Reports/ColumnSelector";
+import PageOptions from "../components/Reports/PageOptions";
 import ReportTable from "../components/Reports/ReportTable";
 import { fetchWithAuth } from "../../../lib/fetchWithAuth";
+import { Page } from "@react-pdf/renderer";
 
 const columnOptions = [
   { key: "name", label: "Ad Soyad" },
@@ -35,12 +37,18 @@ export default function Reports() {
     fontSize: 16,
     showHeader: true,
   });
+  const [pageOptions, setPageOptions] = useState({
+    orientation: "portrait",
+    showLogo: false,
+  });
 
   useEffect(() => {
     const storedCols = JSON.parse(localStorage.getItem("personnel-report-columns"));
     const storedHeader = JSON.parse(localStorage.getItem("personnel-report-header"));
+    const storedPage = JSON.parse(localStorage.getItem("personnel-page-option"));
     if (storedCols && Array.isArray(storedCols)) setSelectedColumns(storedCols);
     if (storedHeader) setHeaderOptions((prev) => ({ ...prev, ...storedHeader }));
+    if (storedPage) setPageOptions((prev) => ({ ...prev, ...storedPage }));
   }, []);
 
   const handleReport = async () => {
@@ -102,7 +110,7 @@ export default function Reports() {
         headerOptions={headerOptions}
         setHeaderOptions={setHeaderOptions}
       />
-
+      <PageOptions pageOptions={pageOptions} setPageOptions={setPageOptions} />
       <div className="flex justify-center items-center gap-4 my-4">
         <button
           onClick={handleReport}
@@ -118,6 +126,7 @@ export default function Reports() {
           selectedColumns={selectedColumns}
           columnLabels={columnLabels}
           headerOptions={headerOptions}
+          pageOptions={pageOptions}
         />
       )}
     </div>

@@ -118,7 +118,7 @@ router.put("/:id", authMiddleware, upload.single("image_file"), async (req, res)
   try {
     await db.execute(
       `UPDATE personnel SET
-        name = ?, tc_no = ?, birth_day = ?, address = ?, phone = ?, email = ?, marital_status = ?,
+        name = ?, tc_no = ?, birth_date = ?, address = ?, phone = ?, email = ?, marital_status = ?,
         criminal_record = ?, children_count = ?, driving_license = ?, education_level = ?, iban = ?,
         department = ?, certificates = ?, size_pants = ?, size_tshirt = ?, size_coat = ?, size_shoes = ?,
         start_date = ?, role = ?, image_file = ?

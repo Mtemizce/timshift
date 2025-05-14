@@ -17,7 +17,7 @@ export const handleExport = (format, data, selectedColumns, columnLabels, header
 
 const getCurrentUserName = () => {
   try {
-    const userStr = localStorage.getItem("admins");
+    const userStr = localStorage.getItem("admin");
     if (!userStr) return "Bilinmeyen Kullanıcı";
     const user = JSON.parse(userStr);
     return user?.name || "Bilinmeyen Kullanıcı";

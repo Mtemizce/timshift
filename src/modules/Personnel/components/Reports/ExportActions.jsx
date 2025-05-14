@@ -5,12 +5,13 @@ import PersonnelReportPDF from "./pdf/PersonnelReportPDF";
 
 
 
-export default function ExportActions({ data, selectedColumns, columnLabels, headerOptions }) {
+export default function ExportActions({ data, selectedColumns, columnLabels, customPageTitle, pageOptions }) {
   const pdfKey = JSON.stringify({
   data,
   selectedColumns,
   columnLabels,
-  headerOptions,
+  customPageTitle,
+  pageOptions
 });
   return (
     
@@ -18,7 +19,7 @@ export default function ExportActions({ data, selectedColumns, columnLabels, hea
       {data?.length > 0 && selectedColumns?.length > 0 && (
         <PDFDownloadLink
           key={pdfKey} // yeniden oluşturulmasını zorla
-          document={<PersonnelReportPDF data={data} selectedColumns={selectedColumns} columnLabels={columnLabels} headerOptions={headerOptions} />}
+          document={<PersonnelReportPDF data={data} selectedColumns={selectedColumns} columnLabels={columnLabels} customPageTitle={customPageTitle} pageOptions={pageOptions}/>}
           fileName="personel_raporu.pdf"
         >
           {({ loading }) => (
@@ -29,10 +30,10 @@ export default function ExportActions({ data, selectedColumns, columnLabels, hea
         </PDFDownloadLink>
       )}
 
-      <button title="Excel" className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded cursor-pointer" onClick={() => handleExport("excel", data, selectedColumns, columnLabels, headerOptions)}>
+      <button title="Excel" className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded cursor-pointer" onClick={() => handleExport("excel", data, selectedColumns, columnLabels, customPageTitle, pageOptions)}>
         <FileDown size={18} />
       </button>
-      <button title="Yazdır" className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded cursor-pointer" onClick={() => handleExport("print", data, selectedColumns, columnLabels, headerOptions)}>
+      <button title="Yazdır" className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded cursor-pointer" onClick={() => handleExport("print", data, selectedColumns, columnLabels, customPageTitle, pageOptions)}>
         <Printer size={18} />
       </button>
     </div>

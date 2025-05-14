@@ -46,3 +46,20 @@
 .tableBtnFullscreen {
   @apply bg-gray-500 text-white hover:bg-gray-600;
 }
+
+/* Rapor Ekranı ReportTable Stilleri */
+ 
+.reportTableHeadTr {
+  @apply font-bold uppercase text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800;
+}
+.reportTableHeadTh {
+  @apply px-4 py-3 text-center font-bold border-collapse border border-gray-400 dark:border-gray-700  whitespace-nowrap;
+}
+ 
+.reportTableBodyTr {
+  @apply  font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 
+  bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700;
+  }
+.reportTableBodyTd {
+  @apply px-2 py-2 text-center whitespace-nowrap border-collapse border border-gray-200 dark:border-gray-800;
+}

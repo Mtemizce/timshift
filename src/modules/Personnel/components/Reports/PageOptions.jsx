@@ -1,22 +1,17 @@
 import { React } from "react";
 
 export default function PageConfig({ pageOptions, setPageOptions }) {
-
-const updateOptions = (field, value) => {
-  
-  const updated = { ...pageOptions, [field]: value };
-  setPageOptions(updated);
-  localStorage.setItem("personnel-page-option", JSON.stringify(updated));
-
- const toggleLogoVisibility = () => {
+  const updateOptions = (field, value) => {
+    const updated = { ...pageOptions, [field]: value };
+    setPageOptions(updated);
+    localStorage.setItem("personnel-page-option", JSON.stringify(updated));
+  };
+  const toggleLogoVisibility = () => {
     updateOptions("showLogo", !pageOptions.showLogo);
   };
   return (
-   
-    <div className="w-full md:w-1/2">
-      <div className="flex items-center justify-between cursor-pointer mb-2">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-white">Sayfa Yapılandırması</h3>
-      </div>
+    <div className="w-full ">
+     
 
       <div className="flex flex-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-md shadow-md">
         <div>
@@ -35,7 +30,5 @@ const updateOptions = (field, value) => {
         </div>
       </div>
     </div>
-   
   );
-
 }

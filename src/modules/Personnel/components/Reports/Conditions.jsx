@@ -47,15 +47,8 @@ export default function Conditions({ conditions, setConditions }) {
   };
 
   return (
-    <div className="w-full md:w-1/2">
-      <div
-        className="flex items-center justify-between cursor-pointer mb-2"
-      
-      >
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-white">Filtre Koşulları</h3>
-        
-      </div>
-
+    <div className="w-full ">
+    
       {open && (
         <div className="flex flex-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-md shadow-md">
           {conditions.map((cond, index) => {

@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Font, Image } from "@react-pdf/renderer";
 import { useEffect } from "react";
 
 // Stil tanımı sabit
@@ -12,12 +12,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     marginBottom: 2,
-    marginTop: 10,
+    marginTop: 2,
   },
   table: {
     display: "table",
     width: "auto",
-    marginTop: 5,
+    marginTop: 15,
   },
   row: {
     flexDirection: "row",
@@ -35,9 +35,16 @@ const styles = StyleSheet.create({
     border: "1px solid #ccc",
     textAlign: "center",
   },
+  image: {
+    width: 100,
+    height: 100,
+    marginBottom: 2,
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
 });
 
-const PersonnelReportPDF = ({ data, selectedColumns, columnLabels, headerOptions }) => {
+const PersonnelReportPDF = ({ data, selectedColumns, columnLabels, customPageTitle, pageOptions }) => {
   useEffect(() => {
     Font.register({
       family: "Roboto",
@@ -49,29 +56,30 @@ const PersonnelReportPDF = ({ data, selectedColumns, columnLabels, headerOptions
 
   return (
     <Document>
-      <Page size="A4" orientation={headerOptions.orientation || "portrait"} style={styles.page}>
+      <Page size="A4" orientation={pageOptions.orientation || "portrait"} style={styles.page}>
         <Text
           style={{
             position: "absolute",
             top: 10,
-            marginBottom: 20,
+            marginBottom: 30,
             right: 20,
             fontSize: 10,
           }}
         >
           {new Date().toLocaleDateString("tr-TR")}
         </Text>
-        {headerOptions?.showHeader && headerOptions.text && (
+        {pageOptions?.showLogo && <Image style={{ ...styles.image }} src="https://placehold.co/100x100" /> }
+        {customPageTitle?.showTitle && customPageTitle.text && (
           <Text
             style={{
               ...styles.title,
-              textAlign: headerOptions.align,
-              fontSize: headerOptions.fontSize || 14,
-              color: headerOptions.textColor || "#000000",
-              backgroundColor: headerOptions.bgColor || "#ffffff",
+              textAlign: customPageTitle.align,
+              fontSize: customPageTitle.fontSize || 14,
+              color: customPageTitle.textColor || "#000000",
+              backgroundColor: customPageTitle.bgColor || "#ffffff",
             }}
           >
-            {headerOptions.text}
+            {customPageTitle.text}
           </Text>
         )}
 
@@ -112,7 +120,7 @@ const PersonnelReportPDF = ({ data, selectedColumns, columnLabels, headerOptions
             </View>
           ))}
         </View>
-        <Text style={{ position: "absolute", bottom: 10, textAlign: "center", fontSize: 10, left: "50%", transform: "translateX(-50%)" }} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
+        <Text style={{ position: "absolute", bottom: 10, textAlign: "center", fontSize: 10, left: 0, right: 0 }} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
       </Page>
     </Document>
   );

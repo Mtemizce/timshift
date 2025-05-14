@@ -4,7 +4,8 @@ export default function ReportTable({
   filteredData,
   selectedColumns,
   columnLabels,
-  headerOptions,
+  customPageTitle,
+  pageOptions
 }) {
   const data = Array.isArray(filteredData) ? filteredData : [];
 
@@ -23,29 +24,32 @@ export default function ReportTable({
           data={data}
           selectedColumns={selectedColumns}
           columnLabels={columnLabels}
-          headerOptions={headerOptions}
+          customPageTitle={customPageTitle}
+          pageOptions={pageOptions}
         />
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 text-sm dark:text-white dark:divide-gray-600">
-          <thead className="bg-gray-100 dark:bg-gray-700">
-            <tr>
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="reportTableHeadTr">
+              <th className="reportTableHeadTh">#</th>
               {selectedColumns.map((colKey) => (
                 <th
                   key={colKey}
-                  className="px-6 py-3 text-left font-medium text-gray-700 dark:text-white whitespace-nowrap"
+                  className="reportTableHeadTh"
                 >
                   {columnLabels[colKey] || colKey}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-900">
+          <tbody>
             {data.map((row, idx) => (
-              <tr key={idx}>
+              <tr key={idx} className="reportTableBodyTr">
+                <td className="reportTableBodyTd">{idx + 1}</td>
                 {selectedColumns.map((colKey) => (
-                  <td key={colKey} className="px-6 py-4 whitespace-nowrap">
+                  <td key={colKey} className="reportTableBodyTd">
                     {typeof row[colKey] === "string" && /^\d{4}-\d{2}-\d{2}T/.test(row[colKey])
                       ? new Date(row[colKey]).toLocaleDateString("tr-TR")
                       : row[colKey] ?? "-"}

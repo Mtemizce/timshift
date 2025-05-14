@@ -113,20 +113,20 @@ export default function Reports() {
     <div className="w-full md:w-9/12 mx-auto flex flex-col p-2 justify-center items-center">
       {/* Sekmeler */}
       <div className="w-full mb-4">
-        <div className="flex flex-wrap border-b border-gray-300 dark:border-gray-600">
-          <button className={`flex justify-between align-middle space-x-2 py-2 px-4 text-sm font-medium ${activeTab === "columns" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500 hover:text-blue-600"}`} onClick={() => setActiveTab("columns")}>
+        <div className="reportTabsDiv">
+          <button className={`reportTabsBtn ${activeTab === "columns" ? "reportTabsBtnActive" : "reportTabsBtnNormal"}`} onClick={() => setActiveTab("columns")}>
            <Home size={18} /> <span>Kolonlar</span>
            
           </button>
-          <button className={`flex justify-between align-middle space-x-2 py-2 px-4 text-sm font-medium ${activeTab === "conditions" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500 hover:text-blue-600"}`} onClick={() => setActiveTab("conditions")}>
+          <button className={`reportTabsBtn ${activeTab === "conditions" ? "reportTabsBtnActive" : "reportTabsBtnNormal"}`} onClick={() => setActiveTab("conditions")}>
             <ListFilter size={18} /> <span>Filtreler</span>
             
           </button>
-          <button className={`flex justify-between align-middle space-x-2 py-2 px-4 text-sm font-medium ${activeTab === "pagetitle" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500 hover:text-blue-600"}`} onClick={() => setActiveTab("pagetitle")}>
+          <button className={`reportTabsBtn ${activeTab === "pagetitle" ? "reportTabsBtnActive" : "reportTabsBtnNormal"}`} onClick={() => setActiveTab("pagetitle")}>
             <BookType size={18} /> <span>Üst Başlık</span>
             
           </button>
-          <button className={`flex justify-between align-middle space-x-2 py-2 px-4 text-sm font-medium ${activeTab === "page" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500 hover:text-blue-600"}`} onClick={() => setActiveTab("page")}>
+          <button className={`reportTabsBtn ${activeTab === "page" ? "reportTabsBtnActive" : "reportTabsBtnNormal"}`} onClick={() => setActiveTab("page")}>
             <Columns3Cog size={18} /> <span>Sayfa Ayarları</span>
           </button>
         </div>
@@ -140,7 +140,7 @@ export default function Reports() {
         </div>
       </div>
       <div className="flex justify-center items-center gap-4 my-4">
-        <button onClick={handleReport} className="font-bold bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm cursor-pointer transition-colors duration-300">
+        <button onClick={handleReport} className="reportGetBtn">
           Raporu Getir
         </button>
       </div>
